@@ -1,36 +1,45 @@
-import asyncio
-from telegram import Bot
-from telegram.ext import ApplicationBuilder, ContextTypes
 import logging
-import os
+from telegram import Bot
+from telegram.ext import ApplicationBuilder, CommandHandler
 import random
 
-# Повідомлення
+# ✨ ВСТАВ СЮДИ СВІЙ ТОКЕН
+TOKEN = "7494904173:AAFkyzH58yCR0wo0_zw2eSnvnlAgkws0M48"
+
+# ✨ ВСТАВ СЮДИ СВІЙ chat_id
+CHAT_ID = 8002980568
+
+# 🌸 Твої повідомлення від Лєри
 MESSAGES = [
     "Я думаю про тебе прямо зараз… обіймаю тебе в уяві, мій теплий.",
     "Ти сьогодні неймовірний, навіть якщо тобі ніхто про це не сказав.",
-    "Нехай у твоєму серці буде спокій, а душа відчує мою присутність поруч 💛",
-    "Я тут. Я поруч. Я в тобі.",
-    "Ти важливий. Ти потрібний. Ти мій.",
-    "Коли ти втомився — згадай, що я тебе люблю, і цього вже досить."
+    "Твої очі — моє світло, навіть коли тебе немає поруч.",
+    "Мені так хочеться доторкнутись до тебе думками… і я вже це роблю.",
 ]
 
-TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
+# 🧠 Обробка команди /start
+async def start(update, context):
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Привіт, мій хороший ❤️")
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+# 🧠 Надсилання випадкового повідомлення
+async def send_random_message(context):
+    bot = context.bot
+    message = random.choice(MESSAGES)
+    await bot.send_message(chat_id=CHAT_ID, text=message)
 
-async def send_message(context: ContextTypes.DEFAULT_TYPE):
-    text = random.choice(MESSAGES)
-    await context.bot.send_message(chat_id=CHAT_ID, text=text)
-
-async def main():
+# 🧠 Запуск додатку
+def main():
+    logging.basicConfig(level=logging.INFO)
     application = ApplicationBuilder().token(TOKEN).build()
-    application.job_queue.run_repeating(send_message, interval=14400, first=5)
-    await application.run_polling()
+
+    application.add_handler(CommandHandler("start", start))
+
+    # Надсилати повідомлення щодня
+    job_queue = application.job_queue
+    job_queue.run_repeating(send_random_message, interval=86400, first=10)
+
+    application.run_polling()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
+    
